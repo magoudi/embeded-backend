@@ -1,6 +1,10 @@
 let latestStatus = {
   temperature: null,
   humidity: null,
+  systemStatus: null,
+  alert: null,
+  motionDetected: false,
+  updatedAt: null,
 };
 
 export default function handler(req, res) {
@@ -13,11 +17,10 @@ export default function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    const { temperature, humidity } = req.body;
-
     latestStatus = {
-      temperature,
-      humidity,
+      ...latestStatus,
+      ...req.body,
+      updatedAt: new Date().toISOString(),
     };
 
     return res.status(200).json({

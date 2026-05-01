@@ -26,9 +26,16 @@ app.get("/command", (req, res) => {
 });
 
 app.post("/status", (req, res) => {
-  const { temperature, humidity } = req.body;
-  latestStatus = { temperature, humidity };
-  res.json({ success: true, status: latestStatus });
+  latestStatus = {
+    ...latestStatus,
+    ...req.body,
+    updatedAt: new Date().toISOString(),
+  };
+
+  res.json({
+    success: true,
+    status: latestStatus,
+  });
 });
 
 app.get("/status", (req, res) => {
