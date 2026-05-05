@@ -1,4 +1,4 @@
-import { put } from "@vercel/blob";
+import { setLatestFrame, broadcastFrame, getLatestFrameTime } from "./store.js";
 
 export const config = {
   api: {
@@ -30,25 +30,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    const imageBuffer = await readRawBody(req);
+    const body = await readRawBody(req);
 
-    if (!imageBuffer || imageBuffer.length === 0) {
-      return res.status(400).json({ error: "No image received" });
+    if (!body || body.length === 0) {
+      return res.status(400).json({ error: "No frame received" });
     }
 
-    const blob = await put("camera/latest.jpg", imageBuffer, {
-      access: "public",
-      contentType: "image/jpeg",
-      allowOverwrite: true,
-      addRandomSuffix: false,
-      cacheControlMaxAge: 0,
-    });
+    const latestFrame = Buffer.from(body);
+
+    setLatestFrame(latestFrame);
+    broadcastFrame(latestFrame);
 
     return res.status(200).json({
       success: true,
-      size: imageBuffer.length,
-      time: new Date().toISOString(),
-      url: blob.url,
+      size: latestFrame.length,
+      time: getLatestFrameTime(),
     });
   } catch (error) {
     console.error("Camera upload error:", error);
